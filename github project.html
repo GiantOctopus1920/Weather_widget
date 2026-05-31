@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Pogodowy - Mapa Infograficzna</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        @media (max-width: 950px) {
+            .container { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 650px) {
+            .container { grid-template-columns: 1fr; }
+        }
+        
+        .card {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        .current {
+            background-color: #222;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .temp { font-size: 2em; font-weight: bold; color: #ffcc00; margin: 5px 0; }
+        .advice {
+            background-color: #1a3320;
+            border-left: 5px solid #2ecc71;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            min-height: 20px;
+        }
+        .section-title { 
+            color: #4da6ff; font-size: 1.1em; border-bottom: 1px solid #444; 
+            padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px; 
+        }
+        .data-list { 
+            background-color: #333; border-radius: 6px; padding: 10px; 
+            font-size: 0.9em; max-height: 150px; overflow-y: auto; 
+            margin-bottom: 15px;
+        }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #444;
+        }
+        .data-row:last-child { border-bottom: none; }
+        
+        .hourly-row span {
+            flex: 1;
+            text-align: center;
+        }
+        .hourly-row span:first-child { text-align: left; }
+        .hourly-row span:last-child { text-align: right; }
+
+        /* KONTENER MAPY CYFROWEJ */
+        .map-wrapper { 
+            height: 240px; margin-top: auto; border-radius: 6px; overflow: hidden; 
+            background: #181818; border: 1px solid #444; position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        canvas { background-color: #151515; border-radius: 4px; }
+        .map-legend {
+            position: absolute; bottom: 5px; right: 8px; font-size: 0.7em; color: #aaa;
+            background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<button style="display: block; margin: 10px auto 20px; padding: 10px 20px; background: #4da6ff; color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;" onclick="window.location.reload()">Odśwież dane i mapy</button>
+
+<div class="container">
+    
+    <div class="card" id="loc1">
+        <div class="section-title" style="margin-top: 0;">Sufczyn</div>
+        <div class="current">
+            <div class="temp">...</div>
+            <div class="wind">Pobieranie...</div>
+        </div>
+        <div class="advice">Ładowanie danych...</div>
+        <div class="section-title">Prognoza opadów i temp.</div>
+        <div class="data-list hourly">Trwa pobieranie...</div>
+        <div class="section-title">Najbliższe dni</div>
+        <div class="data-list daily">Trwa pobieranie...</div>
+        
+        <div class="section-title">Cyfrowy Radar Opadów (Najbliższe godziny)</div>
+        <div class="map-wrapper">
+            <canvas id="canvas-loc1" width="260" height="220"></canvas>
+            <div class="map-legend">Niebieski = Deszcz wokół celu</div>
+        </div>
+    </div>
+
+    <div class="card" id="loc2">
+        <div class="section-title" style="margin-top: 0;">Kraków (Pl. Getta)</div>
+        <div class="current">
+            <div class="temp">...</div>
+            <div class="wind">Pobieranie...</div>
+        </div>
+        <div class="advice">Ładowanie danych...</div>
+        <div class="section-title">Prognoza opadów i temp.</div>
+        <div class="data-list hourly">Trwa pobieranie...</div>
+        <div class="section-title">Najbliższe dni</div>
+        <div class="data-list daily">Trwa pobieranie...</div>
+        
+        <div class="section-title">Cyfrowy Radar Opadów (Najbliższe godziny)</div>
+        <div class="map-wrapper">
+            <canvas id="canvas-loc2" width="260" height="220"></canvas>
+            <div class="map-legend">Niebieski = Deszcz wokół celu</div>
+        </div>
+    </div>
+
+    <div class="card" id="loc3">
+        <div class="section-title" style="margin-top: 0;">Sępopol (ul. Długa)</div>
+        <div class="current">
+            <div class="temp">...</div>
+            <div class="wind">Pobieranie...</div>
+        </div>
+        <div class="advice">Ładowanie danych...</div>
+        <div class="section-title">Prognoza opadów i temp.</div>
+        <div class="data-list hourly">Trwa pobieranie...</div>
+        <div class="section-title">Najbliższe dni</div>
+        <div class="data-list daily">Trwa pobieranie...</div>
+        
+        <div class="section-title">Cyfrowy Radar Opadów (Najbliższe godziny)</div>
+        <div class="map-wrapper">
+            <canvas id="canvas-loc3" width="260" height="220"></canvas>
+            <div class="map-legend">Niebieski = Deszcz wokół celu</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var locations = [
+        { id: 'loc1', lat: 49.9625, lon: 20.7497 },
+        { id: 'loc2', lat: 50.0468, lon: 19.9544 },
+        { id: 'loc3', lat: 54.2710, lon: 21.0110 }
+    ];
+
+    function getDesc(code) {
+        if (code === 0) return "Pogodnie";
+        if (code >= 1 && code <= 3) return "Lekkie zachmurzenie";
+        if (code >= 45 && code <= 48) return "Mgła";
+        if (code >= 51 && code <= 67) return "Deszcz";
+        if (code >= 71 && code <= 77) return "Śnieg";
+        if (code >= 80 && code <= 82) return "Ulewa";
+        if (code >= 95 && code <= 99) return "Burza";
+        return "Pochmurno";
+    }
+
+    function getAdvice(temp, wind, precip) {
+        var text = "";
+        var isBad = false;
+        if (precip > 0.5) { text += "Szykuje się deszcz. Weź pelerynę! <br>"; isBad = true; }
+        else if (precip > 0) { text += "Możliwa drobna mżawka. <br>"; }
+        if (wind > 30) { text += "Silny wiatr, jazda będzie trudna. <br>"; isBad = true; }
+        else if (wind > 18) { text += "Umiarkowany wiatr. <br>"; }
+        if (temp < 0) { text += "Mróz. Uwaga na oblodzenia! <br>"; isBad = true; }
+        else if (temp < 10) { text += "Chłodno, ubierz się cieplej. <br>"; }
+        if (temp > 28) { text += "Upał! Zabierz więcej wody. <br>"; isBad = true; }
+        
+        if (!isBad && precip === 0 && wind <= 18 && temp >= 10 && temp <= 28) {
+            return "<b>Idealne warunki na rower!</b> Wskakuj na siodełko.";
+        }
+        return text || "Dobre warunki do jazdy drogowej.";
+    }
+
+    // FUNKCJA GENERUJĄCA MAPĘ GEOGRAFICZNĄ NA CANVASIE
+    function drawDigitalRadar(canvasId, targetRain, hourlyPredict) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        
+        // Czyszczenie tła
+        ctx.fillStyle = "#151515";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Rysowanie uproszczonych siatek/okręgów radarowych (odległość od celu)
+        ctx.strokeStyle = "#252525";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(130, 110, 40, 0, 2 * Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(130, 110, 80, 0, 2 * Math.PI); ctx.stroke();
+        
+        // Linie pomocnicze (kierunki świata)
+        ctx.strokeStyle = "#202020";
+        ctx.beginPath(); ctx.moveTo(130, 10); ctx.lineTo(130, 210); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(10, 110); ctx.lineTo(250, 110); ctx.stroke();
+
+        // GENEROWANIE PLAM OPADÓW (Chmur deszczowych) wokół celu
+        if (targetRain > 0 || hourlyPredict.some(function(h){ return h.rain > 0; })) {
+            // Skrypt symuluje układ plam deszczu na podstawie danych godzinowych
+            for (var i = 0; i < hourlyPredict.length; i++) {
+                var h = hourlyPredict[i];
+                if (h.rain > 0) {
+                    // Tworzenie dynamicznych współrzędnych chmury (symulacja przemieszczania się frontu)
+                    var xOffset = 130 + (i * 18) - 40;
+                    var yOffset = 110 - (i * 8) + 20;
+                    var radius = Math.min(h.rain * 22, 50) + 15;
+
+                    // Gładki gradient chmury deszczowej (jak w MSN Pogoda)
+                    var gradient = ctx.createRadialGradient(xOffset, yOffset, 2, xOffset, yOffset, radius);
+                    gradient.addColorStop(0, 'rgba(0, 100, 255, 0.6)');   // Środek ulewy
+                    gradient.addColorStop(0.5, 'rgba(0, 162, 255, 0.3)'); // Lekki deszcz
+                    gradient.addColorStop(1, 'rgba(0, 162, 255, 0)');    // Brzeg chmury
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(xOffset, yOffset, radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+        } else {
+            // Komunikat o braku chmur deszczowych w okolicy
+            ctx.fillStyle = "#2ecc71";
+            ctx.font = "11px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("BRAK OPADÓW W ZASIĘGU RADARU", 130, 113);
+        }
+
+        // Środek - lokalizacja celu (znacznik GPS)
+        ctx.fillStyle = "#ffcc00";
+        ctx.shadowColor = "#ffcc00";
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(130, 110, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Reset cieniowania
+        ctx.shadowBlur = 0;
+    }
+
+    function fetchWeatherData() {
+        for (var i = 0; i < locations.length; i++) {
+            (function(loc) {
+                var card = document.getElementById(loc.id);
+                if (!card) return;
+
+                var xhr = new XMLHttpRequest();
+                var url = "https://api.open-meteo.com/v1/forecast?latitude=" + loc.lat + "&longitude=" + loc.lon + "&current=temperature_2m,wind_speed_10m&hourly=precipitation,temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FWarsaw&timeformat=unixtime";
+                
+                xhr.open("GET", url, true);
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        var data = JSON.parse(xhr.responseText);
+                        
+                        var t = Math.round(data.current.temperature_2m);
+                        var w = Math.round(data.current.wind_speed_10m);
+                        card.querySelector('.temp').innerHTML = t + " &deg;C";
+                        card.querySelector('.wind').innerHTML = "Wiatr: " + w + " km/h";
+
+                        var nowSec = Math.floor(new Date().getTime() / 1000);
+                        var hIndex = 0;
+                        for (var j = 0; j < data.hourly.time.length; j++) {
+                            if (data.hourly.time[j] >= nowSec - 3600) {
+                                hIndex = j;
+                                break;
+                            }
+                        }
+
+                        // Wiersze godzinowe: Czas | Temperatura | Opady (W jednym rzędzie)
+                        var hHTML = "";
+                        var rain3h = 0;
+                        var hourlyPredict = [];
+
+                        for (var k = 0; k < 8; k++) {
+                            var idx = hIndex + k;
+                            if (idx >= data.hourly.time.length) break;
+                            
+                            var dateObj = new Date(data.hourly.time[idx] * 1000);
+                            var hours = dateObj.getHours();
+                            if (hours < 10) hours = "0" + hours;
+                            var timeStr = hours + ":00";
+                            
+                            var p = data.hourly.precipitation[idx] || 0;
+                            var tempHour = Math.round(data.hourly.temperature_2m[idx]);
+                            
+                            if (k < 3) rain3h += p; 
+                            var color = p > 0 ? "#4da6ff" : "#aaaaaa";
+                            
+                            hourlyPredict.push({ time: timeStr, rain: p, temp: tempHour });
+
+                            hHTML += '<div class="data-row hourly-row">' +
+                                        '<span>' + timeStr + '</span>' +
+                                        '<span style="color:#cccccc;">' + tempHour + ' &deg;C</span>' +
+                                        '<span style="color:' + color + '; font-weight:bold;">' + p + ' mm</span>' +
+                                     '</div>';
+                        }
+                        card.querySelector('.hourly').innerHTML = hHTML;
+
+                        // RYSOWANIE CYFROWEJ MAPY RADAROWEJ
+                        drawDigitalRadar('canvas-' + loc.id, rain3h, hourlyPredict);
+
+                        // Porada rowerowa
+                        var advDiv = card.querySelector('.advice');
+                        advDiv.innerHTML = getAdvice(t, w, rain3h);
+                        if (advDiv.innerHTML.indexOf("deszcz") !== -1 || advDiv.innerHTML.indexOf("Silny") !== -1 || advDiv.innerHTML.indexOf("Mróz") !== -1 || advDiv.innerHTML.indexOf("Upał") !== -1) {
+                            advDiv.style.borderLeftColor = "#e74c3c"; advDiv.style.backgroundColor = "#331c1a";
+                        } else if (advDiv.innerHTML.indexOf("Idealne") !== -1) {
+                            advDiv.style.borderLeftColor = "#2ecc71"; advDiv.style.backgroundColor = "#1a3320";
+                        } else {
+                            advDiv.style.borderLeftColor = "#f1c40f"; advDiv.style.backgroundColor = "#332c1a";
+                        }
+
+                        // Dni prognozy
+                        var dHTML = "";
+                        for(var m = 1; m <= 5; m++) {
+                            if (m >= data.daily.time.length) break;
+                            var dDate = new Date(data.daily.time[m] * 1000);
+                            var daysPl = ["Niedz", "Pon", "Wt", "Śr", "Czw", "Pt", "Sob"];
+                            var dName = daysPl[dDate.getDay()];
+                            var minTemp = Math.round(data.daily.temperature_2m_min[m]);
+                            var maxTemp = Math.round(data.daily.temperature_2m_max[m]);
+                            var desc = getDesc(data.daily.weather_code[m]);
+                            
+                            dHTML += '<div class="data-row">' +
+                                        '<span>' + dName + ' (' + desc + ')</span>' +
+                                        '<span style="font-weight:bold;">' + minTemp + '&deg;C / ' + maxTemp + '&deg;C</span>' +
+                                     '</div>';
+                        }
+                        card.querySelector('.daily').innerHTML = dHTML;
+
+                    }
+                };
+                xhr.send();
+            })(locations[i]);
+        }
+    }
+
+    fetchWeatherData();
+</script>
+</body>
+</html>
